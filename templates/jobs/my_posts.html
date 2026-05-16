@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}내 구인글 - 알바핀치{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    <a href="{% url 'jobs:list' %}" class="back">←</a>
+    <h1>내 구인글</h1>
+    <a href="{% url 'jobs:create' %}" class="right">+ 글쓰기</a>
+</div>
+
+<div class="page">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}<div class="msg {{ message.tags }}">{{ message }}</div>{% endfor %}
+    </div>
+    {% endif %}
+    
+    {% for post in job_posts %}
+    <div class="card">
+        {# 구인글 정보 #}
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <span class="badge badge-{{ post.status }}">{{ post.get_status_display }}</span>
+            <span style="font-size: 11px; color: #999;">{{ post.created_at|date:"n/j H:i" }}</span>
+        </div>
+        <a href="{% url 'jobs:detail' post.pk %}" style="font-size: 16px; font-weight: 500; display: block; margin-bottom: 8px; color: #222;">{{ post.title }}</a>
+        <div style="font-size: 12px; color: #666; margin-bottom: 12px;">
+            📍 {{ post.location_sigungu }} · 🕐 {{ post.work_date|date:"n/j H:i" }} · {{ post.hourly_wage|intcomma }}원/시
+        </div>
+        
+        {# 지원자 목록 #}
+        <div style="border-top: 1px solid #f0f0f0; padding-top: 12px;">
+            <h4 style="font-size: 13px; color: #666; margin-bottom: 10px;">지원자 ({{ post.applications.count }}명)</h4>
+            
+            {% for app in post.applications.all %}
+            <div style="background: #f8f8f8; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <strong style="font-size: 14px;">{{ app.applicant.nickname }}</strong>
+                    <span class="badge badge-{{ app.status }}">{{ app.get_status_display }}</span>
+                </div>
+                
+                <div style="font-size: 12px; color: #666; margin-bottom: 6px;">⭐ {{ app.applicant.rating_avg }} ({{ app.applicant.rating_count }}건)</div>
+                
+                {% if app.applicant.career_summary %}
+                <div style="font-size: 13px; color: #555; margin-bottom: 6px; padding: 8px; background: white; border-radius: 4px;">
+                    💼 {{ app.applicant.career_summary }}
+                </div>
+                {% endif %}
+                
+                {% if app.message %}
+                <div style="font-size: 13px; color: #444; margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
+                    💬 {{ app.message }}
+                </div>
+                {% endif %}
+                
+                {% if app.status == 'accepted' %}
+                <div style="font-size: 15px; color: #2E7D32; font-weight: 600; padding: 8px; background: #E1F5EE; border-radius: 4px; text-align: center;">
+                    📞 {{ app.applicant.phone }}
+                </div>
+                {% elif app.status == 'pending' %}
+                <div style="display: flex; gap: 6px; margin-top: 10px;">
+                    <form method="post" action="{% url 'jobs:accept' app.pk %}" style="flex: 1;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm btn-block">수락</button>
+                    </form>
+                    <form method="post" action="{% url 'jobs:reject' app.pk %}" style="flex: 1;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm btn-block">거절</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p style="font-size: 13px; color: #999; text-align: center; padding: 16px;">
+                아직 지원자가 없습니다
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="card empty-state">
+        <p>아직 작성한 구인글이 없습니다</p>
+        <a href="{% url 'jobs:create' %}" class="btn btn-primary" style="margin-top: 16px;">구인글 작성하기</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

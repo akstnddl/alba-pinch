@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}프로필 수정 - 알바핀치{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    <a href="{% url 'users:profile' %}" class="back">←</a>
+    <h1>프로필 수정</h1>
+    <span style="width: 30px;"></span>
+</div>
+
+<div class="page">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}<div class="msg {{ message.tags }}">{{ message }}</div>{% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="errors">{{ field.errors|striptags }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary btn-block">저장</button>
+    </form>
+</div>
+{% endblock %}

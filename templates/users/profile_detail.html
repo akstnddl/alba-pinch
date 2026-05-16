@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}내 프로필 - 알바핀치{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    <a href="{% url 'jobs:list' %}" class="back">←</a>
+    <h1>내 프로필</h1>
+    <a href="{% url 'users:profile_edit' %}" class="right">수정</a>
+</div>
+
+<div class="page">
+    <div class="card">
+        <div style="font-size: 12px; color: #999; margin-bottom: 4px;">닉네임</div>
+        <div style="font-size: 16px;">{{ user.nickname }}</div>
+    </div>
+    
+    <div class="card">
+        <div style="font-size: 12px; color: #999; margin-bottom: 4px;">휴대폰 번호</div>
+        <div style="font-size: 16px;">{{ user.phone }}</div>
+        <div style="font-size: 11px; color: #888; margin-top: 4px;">매칭 성사 시 상대방에게 공개됩니다</div>
+    </div>
+    
+    <div class="card">
+        <div style="font-size: 12px; color: #999; margin-bottom: 4px;">경력</div>
+        <div style="font-size: 14px; line-height: 1.5; white-space: pre-wrap;">{{ user.career_summary|default:"미등록" }}</div>
+    </div>
+    
+    <div class="card">
+        <div style="font-size: 12px; color: #999; margin-bottom: 4px;">평점</div>
+        <div style="font-size: 16px;">⭐ {{ user.rating_avg }} ({{ user.rating_count }}건)</div>
+    </div>
+    
+    <a href="{% url 'users:logout' %}" class="btn btn-outline btn-block" style="margin-top: 16px;">로그아웃</a>
+</div>
+{% endblock %}
