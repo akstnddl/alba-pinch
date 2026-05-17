@@ -1,11 +1,16 @@
 {% extends 'base.html' %}
 
-{% block title %}구인글 작성 - 알바핀치{% endblock %}
+{% block title %}{% if is_update %}구인글 수정{% else %}구인글 작성{% endif %} - 알바핀치{% endblock %}
 
 {% block content %}
 <div class="top-bar">
+    {% if is_update %}
+    <a href="{% url 'jobs:detail' job_post.pk %}" class="back">←</a>
+    <h1>구인글 수정</h1>
+    {% else %}
     <a href="{% url 'jobs:list' %}" class="back">←</a>
     <h1>구인글 작성</h1>
+    {% endif %}
     <span style="width: 30px;"></span>
 </div>
 
@@ -21,7 +26,15 @@
         </div>
         {% endfor %}
         
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 8px;">등록하기</button>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 8px;">
+            {% if is_update %}수정 완료{% else %}등록하기{% endif %}
+        </button>
+        
+        {% if is_update %}
+        <a href="{% url 'jobs:detail' job_post.pk %}"
+           class="btn btn-outline btn-block"
+           style="margin-top: 8px; text-align: center;">취소</a>
+        {% endif %}
     </form>
 </div>
 {% endblock %}

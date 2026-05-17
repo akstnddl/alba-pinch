@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}구인글 삭제 - 알바핀치{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="margin-top: 0;">구인글 삭제</h2>
+
+    <p>아래 구인글을 정말 삭제하시겠습니까?</p>
+
+    <div style="background: #f8f8f8; padding: 12px; border-radius: 8px; margin: 16px 0;">
+        <p style="margin: 0; font-weight: bold;">{{ job_post.title }}</p>
+        <p style="margin: 4px 0 0 0; color: #666; font-size: 0.9em;">
+            {{ job_post.location }}<br>
+            {{ job_post.work_date|date:"Y-m-d H:i" }} · 시급 {{ job_post.hourly_wage|floatformat:0 }}원
+        </p>
+    </div>
+
+    <p style="color: #D85A30; font-size: 0.9em;">
+        ⚠️ 삭제하면 복구할 수 없으며, 지원자 정보도 함께 삭제됩니다.
+    </p>
+
+    <form method="post" style="margin-top: 20px;">
+        {% csrf_token %}
+        <div style="display: flex; gap: 8px;">
+            <a href="{% url 'jobs:detail' job_post.pk %}"
+               class="btn btn-outline"
+               style="flex: 1; text-align: center;">취소</a>
+            <button type="submit"
+                    class="btn"
+                    style="flex: 1; background: #D85A30; color: white;">
+                삭제하기
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

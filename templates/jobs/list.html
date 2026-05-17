@@ -22,7 +22,7 @@
     
     {# 검색 #}
     <form method="get" action="" style="margin-bottom: 14px;">
-        <input type="text" name="q" value="{{ keyword }}" placeholder="🔍 지역, 제목으로 검색"
+        <input type="text" name="q" value="{{ keyword }}" placeholder="🔍 장소, 제목으로 검색"
                class="form-control" style="padding: 10px 14px; font-size: 14px;">
     </form>
     
@@ -38,19 +38,43 @@
     {# 구인글 목록 #}
     {% if job_posts %}
         {% for post in job_posts %}
-        <a href="{% url 'jobs:detail' post.pk %}" class="card" style="display: block; {% if post.status != 'open' %}opacity: 0.65;{% endif %}">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+        <a href="{% url 'jobs:detail' post.pk %}"
+           class="card"
+           style="display: block; position: relative; overflow: hidden;
+                  {% if post.status != 'open' %}background: #ececec; color: #999;{% endif %}">
+            
+            {# 모집완료 오버레이: closed/matched 상태에서만 #}
+            {% if post.status == 'closed' or post.status == 'matched' %}
+            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                        display: flex; align-items: center; justify-content: center;
+                        z-index: 5; pointer-events: none;">
+                <div style="background: rgba(50, 50, 50, 0.85); color: white;
+                            padding: 10px 32px; border-radius: 8px;
+                            font-size: 18px; font-weight: 600; letter-spacing: 2px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                    모집완료
+                </div>
+            </div>
+            {% endif %}
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;
+                        {% if post.status != 'open' %}opacity: 0.5;{% endif %}">
                 <span class="badge badge-{{ post.status }}">{{ post.get_status_display }}</span>
                 <span style="font-size: 12px; color: #999;">{{ post.created_at|timesince }} 전</span>
             </div>
-            <h3 style="font-size: 16px; margin-bottom: 8px; line-height: 1.4; color: #222;">{{ post.title }}</h3>
-            <div style="font-size: 13px; color: #666; margin-bottom: 4px;">
-                📍 {{ post.location_sigungu }}{% if post.location_dong %} {{ post.location_dong }}{% endif %}
+            <h3 style="font-size: 16px; margin-bottom: 8px; line-height: 1.4; color: #222;
+                       {% if post.status != 'open' %}opacity: 0.5;{% endif %}">{{ post.title }}</h3>
+            <div style="font-size: 13px; color: #666; margin-bottom: 4px;
+                        {% if post.status != 'open' %}opacity: 0.5;{% endif %}">
+                📍 {{ post.location }}
             </div>
-            <div style="font-size: 13px; color: #666; margin-bottom: 12px;">
+            <div style="font-size: 13px; color: #666; margin-bottom: 12px;
+                        {% if post.status != 'open' %}opacity: 0.5;{% endif %}">
                 🕐 {{ post.work_date|date:"n/j(D) H:i" }} · {{ post.work_hours }}시간
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;
+                        padding-top: 12px; border-top: 1px solid #f0f0f0;
+                        {% if post.status != 'open' %}opacity: 0.5;{% endif %}">
                 <div>
                     <span style="font-size: 17px; font-weight: 600; color: #D85A30;">{{ post.total_wage|intcomma }}원</span>
                     <span style="font-size: 11px; color: #999; margin-left: 4px;">시급 {{ post.hourly_wage|intcomma }}원</span>

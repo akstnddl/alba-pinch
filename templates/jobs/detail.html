@@ -28,14 +28,16 @@
         </div>
         
         <div style="margin-bottom: 12px;">
-            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">📍 근무지</div>
-            <div style="font-size: 15px;">{{ job_post.location_sido }} {{ job_post.location_sigungu }}{% if job_post.location_dong %} {{ job_post.location_dong }}{% endif %}</div>
-            {% if job_post.location_detail %}<div style="font-size: 13px; color: #666; margin-top: 2px;">{{ job_post.location_detail }}</div>{% endif %}
+            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">📍 장소</div>
+            <div style="font-size: 15px;">{{ job_post.location }}</div>
         </div>
         
         <div style="margin-bottom: 12px;">
             <div style="font-size: 12px; color: #999; margin-bottom: 4px;">🕐 근무 시간</div>
-            <div style="font-size: 15px;">{{ job_post.work_date|date:"Y년 n월 j일 (D) H:i" }}부터</div>
+            <div style="font-size: 15px;">시작: {{ job_post.work_date|date:"Y년 n월 j일 (D) H:i" }}</div>
+            {% if job_post.work_end_date %}
+            <div style="font-size: 15px;">종료: {{ job_post.work_end_date|date:"Y년 n월 j일 (D) H:i" }}</div>
+            {% endif %}
             <div style="font-size: 13px; color: #666;">{{ job_post.work_hours }}시간 근무</div>
         </div>
         
@@ -56,7 +58,46 @@
     {% if is_owner %}
         <div class="card" style="text-align: center; background: #FFF3E0;">
             <p style="font-size: 14px; color: #888; margin-bottom: 12px;">이 구인글은 본인이 작성했습니다</p>
-            <a href="{% url 'jobs:my_posts' %}" class="btn btn-outline">지원자 확인하기</a>
+            <a href="{% url 'jobs:my_posts' %}" class="btn btn-outline btn-block" style="margin-bottom: 12px;">지원자 확인하기</a>
+            
+            {# 작성자 전용: 수정/삭제 버튼 #}
+            <div style="display: flex; gap: 8px;">
+                {% if job_post.status == 'open' %}
+                <a href="{% url 'jobs:update' job_post.pk %}"
+                   class="btn"
+                   style="flex: 1; background: white; color: #555; border: 1px solid #ccc;">
+                    ✏️ 수정
+                </a>
+                {% endif %}
+                <a href="{% url 'jobs:delete' job_post.pk %}"
+                   class="btn"
+                   style="flex: 1; background: white; color: #D85A30; border: 1px solid #D85A30;">
+                    🗑️ 삭제
+                </a>
+            </div>
+            
+            {# 모집 마감 버튼: OPEN 상태에서만 #}
+            {% if job_post.status == 'open' %}
+            <form method="post" action="{% url 'jobs:close' job_post.pk %}"
+                  onsubmit="return confirm('정말 모집을 마감하시겠습니까?\n마감 후 7일 뒤 자동으로 삭제됩니다.');"
+                  style="margin-top: 8px;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-block"
+                        style="background: #6c757d; color: white; border: none;">
+                    🛑 모집 마감
+                </button>
+            </form>
+            {% else %}
+                {% if job_post.closed_at %}
+                <p style="font-size: 11px; color: #999; margin-top: 12px;">
+                    ※ {{ job_post.closed_at|date:"n/j H:i" }} 마감됨 · 7일 뒤 자동 삭제
+                </p>
+                {% else %}
+                <p style="font-size: 11px; color: #999; margin-top: 12px;">
+                    ※ 모집중 상태에서만 수정/마감 가능합니다
+                </p>
+                {% endif %}
+            {% endif %}
         </div>
     {% elif not user.is_authenticated %}
         <div class="card" style="text-align: center;">

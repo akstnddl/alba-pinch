@@ -12,9 +12,9 @@ class ApplicationInline(admin.TabularInline):
 
 @admin.register(JobPost)
 class JobPostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'employer', 'location_sigungu', 'work_date', 'hourly_wage', 'status', 'created_at')
-    list_filter = ('status', 'location_sido', 'created_at')
-    search_fields = ('title', 'description', 'employer__nickname')
+    list_display = ('title', 'employer', 'location', 'work_date', 'hourly_wage', 'status', 'closed_at', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('title', 'description', 'employer__nickname', 'location')
     ordering = ('-created_at',)
     readonly_fields = ('view_count', 'created_at', 'updated_at')
     inlines = [ApplicationInline]
