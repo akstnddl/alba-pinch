@@ -18,4 +18,5 @@ urlpatterns = [
     path('jobs/applications/', views.my_applications, name='my_applications'),
     path('applications/<int:pk>/accept/', views.application_accept, name='accept'),
     path('applications/<int:pk>/reject/', views.application_reject, name='reject'),
+    path('applications/<int:pk>/cancel-rejection/', views.application_cancel_rejection, name='cancel_rejection'),
 ]

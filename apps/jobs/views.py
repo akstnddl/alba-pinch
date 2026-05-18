@@ -285,3 +285,33 @@ def application_reject(request: HttpRequest, pk: int) -> HttpResponse:
         messages.error(request, str(e))
 
     return redirect('jobs:my_posts')
+@login_required
+@require_POST
+def application_cancel_rejection(request: HttpRequest, pk: int) -> HttpResponse:
+    """지원 거절 취소 (다시 pending 상태로 되돌림)"""
+    application = get_object_or_404(
+        Application.objects.select_related('job_post'),
+        pk=pk,
+    )
+
+    # 권한: 본인 구인글만
+    if application.job_post.employer != request.user:
+        messages.error(request, '본인 구인글의 지원만 처리할 수 있습니다.')
+        return redirect('jobs:my_posts')
+
+    # 거절된 상태만 취소 가능
+    if application.status != Application.Status.REJECTED:
+        messages.error(request, '거절된 지원만 취소할 수 있습니다.')
+        return redirect('jobs:my_posts')
+
+    # 구인글이 모집중일 때만
+    if application.job_post.status != JobPost.Status.OPEN:
+        messages.error(request, '모집중인 구인글만 처리할 수 있습니다.')
+        return redirect('jobs:my_posts')
+
+    application.status = Application.Status.PENDING
+    application.processed_at = None
+    application.save(update_fields=['status', 'processed_at'])
+
+    messages.success(request, '거절을 취소했습니다. 다시 검토할 수 있습니다.')
+    return redirect('jobs:my_posts')

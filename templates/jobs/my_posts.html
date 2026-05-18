@@ -54,16 +54,17 @@
                 </div>
                 {% endif %}
                 
+                {# 상태별 액션 #}
                 {% if app.status == 'accepted' %}
                 <div style="font-size: 15px; color: #2E7D32; font-weight: 600; padding: 8px; background: #E1F5EE; border-radius: 4px; text-align: center;">
                     📞 {{ app.applicant.phone }}
                 </div>
                 {% elif app.status == 'pending' %}
-<div style="font-size: 12px; color: #888; text-align: center; margin-top: 10px; padding: 6px; background: #fff8f0; border-radius: 4px;">
-    📞 수락 시 상대방의 연락처가 공개됩니다
-</div>
-<div style="display: flex; gap: 6px; margin-top: 6px;">
-    <form method="post" action="{% url 'jobs:accept' app.pk %}" style="flex: 1;">
+                <div style="font-size: 12px; color: #888; text-align: center; margin-top: 10px; padding: 6px; background: #fff8f0; border-radius: 4px;">
+                    📞 수락 시 상대방의 연락처가 공개됩니다
+                </div>
+                <div style="display: flex; gap: 6px; margin-top: 6px;">
+                    <form method="post" action="{% url 'jobs:accept' app.pk %}" style="flex: 1;">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-success btn-sm btn-block">수락</button>
                     </form>
@@ -72,6 +73,16 @@
                         <button type="submit" class="btn btn-danger btn-sm btn-block">거절</button>
                     </form>
                 </div>
+                {% elif app.status == 'rejected' %}
+                <form method="post" action="{% url 'jobs:cancel_rejection' app.pk %}"
+                      onsubmit="return confirm('이 지원자의 거절을 취소하시겠습니까?\n다시 검토 상태로 돌아갑니다.');"
+                      style="margin-top: 10px;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-block"
+                            style="background: #f5f5f5; color: #555; border: 1px solid #ccc;">
+                        🔄 거절 취소 (다시 검토)
+                    </button>
+                </form>
                 {% endif %}
             </div>
             {% empty %}
