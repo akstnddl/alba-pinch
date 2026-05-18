@@ -40,13 +40,21 @@ def job_list(request: HttpRequest) -> HttpResponse:
     # 마감 후 7일 지난 글 자동 정리
     cleanup_old_closed_posts()
 
-    qs = JobPost.objects.select_related('employer').filter(
-        status__in=[
+    # "모집중만 보기" 필터
+    only_open: bool = request.GET.get('only_open') == '1'
+    statuses = (
+        [JobPost.Status.OPEN]
+        if only_open
+        else [
             JobPost.Status.OPEN,
             JobPost.Status.MATCHED,
             JobPost.Status.CLOSED,
         ]
-).annotate(
+    )
+
+    qs = JobPost.objects.select_related('employer').filter(
+        status__in=statuses
+    ).annotate(
         application_count=Count('applications'),
         # 정렬용: 모집중(OPEN)=0, 모집완료=1 → 0이 위로
         status_order=Case(
@@ -67,6 +75,7 @@ def job_list(request: HttpRequest) -> HttpResponse:
     return render(request, 'jobs/list.html', {
         'job_posts': qs[:50],  # 최신 50개
         'keyword': keyword,
+        'only_open': only_open,
     })
 
 
