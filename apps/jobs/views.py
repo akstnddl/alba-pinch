@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, F, Q
+from django.db.models import Case, Count, F, IntegerField, Q, When
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -46,7 +46,15 @@ def job_list(request: HttpRequest) -> HttpResponse:
             JobPost.Status.MATCHED,
             JobPost.Status.CLOSED,
         ]
-    ).annotate(application_count=Count('applications'))
+).annotate(
+        application_count=Count('applications'),
+        # 정렬용: 모집중(OPEN)=0, 모집완료=1 → 0이 위로
+        status_order=Case(
+            When(status=JobPost.Status.OPEN, then=0),
+            default=1,
+            output_field=IntegerField(),
+        ),
+    ).order_by('status_order', '-created_at')
 
     # 검색 (장소 통합 필드로 변경)
     keyword: str = request.GET.get('q', '').strip()
