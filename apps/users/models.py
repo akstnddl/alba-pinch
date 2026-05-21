@@ -12,30 +12,38 @@ phone_validator = RegexValidator(
 
 class UserManager(BaseUserManager):
     """휴대폰 번호 기반 사용자 매니저"""
-    
-    def create_user(self, phone: str, password: str, nickname: str, **extra_fields):
+
+    def create_user(self, phone: str, password: str, nickname: str, email: str = None, **extra_fields):
         """일반 사용자 생성"""
         if not phone:
             raise ValueError('휴대폰 번호는 필수입니다')
         if not nickname:
             raise ValueError('닉네임은 필수입니다')
-        
-        user = self.model(phone=phone, nickname=nickname, **extra_fields)
-        user.set_password(password)  # 비밀번호 자동 해싱
+
+        # 이메일 정규화 (소문자, 빈 문자열은 None으로)
+        if email:
+            email = self.normalize_email(email).strip().lower()
+            if not email:
+                email = None
+        else:
+            email = None
+
+        user = self.model(phone=phone, nickname=nickname, email=email, **extra_fields)
+        user.set_password(password)
         user.save(using=self._db)
         return user
-    
-    def create_superuser(self, phone: str, password: str, nickname: str, **extra_fields):
+
+    def create_superuser(self, phone: str, password: str, nickname: str, email: str = None, **extra_fields):
         """관리자 계정 생성"""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-        return self.create_user(phone, password, nickname, **extra_fields)
+        return self.create_user(phone, password, nickname, email, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     """휴대폰 번호로 로그인하는 사용자"""
-    
+
     phone: str = models.CharField(
         max_length=11,
         unique=True,
@@ -47,36 +55,50 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         verbose_name='닉네임',
     )
+    # 비밀번호 찾기 용도 (선택)
+    email = models.EmailField(
+        blank=True,
+        null=True,
+        unique=True,
+        verbose_name='이메일',
+        help_text='비밀번호 찾기에 사용됩니다 (네이버 메일 권장)',
+    )
     career_summary: str = models.TextField(
         max_length=500,
         blank=True,
         verbose_name='경력 요약',
     )
-    
+
     # 평점 시스템
     rating_avg: float = models.FloatField(default=0.0)
     rating_count: int = models.IntegerField(default=0)
-    
+
     # 권한/상태
     is_active: bool = models.BooleanField(default=True)
     is_staff: bool = models.BooleanField(default=False)
     is_banned: bool = models.BooleanField(default=False, verbose_name='이용 정지')
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     objects = UserManager()
-    
+
     USERNAME_FIELD = 'phone'  # 로그인 시 사용할 필드
     REQUIRED_FIELDS = ['nickname']  # createsuperuser 시 추가 입력 필드
-    
+
     class Meta:
         verbose_name = '사용자'
         verbose_name_plural = '사용자 목록'
-    
+
+    def save(self, *args, **kwargs):
+        """빈 이메일 문자열은 None으로 변환 (unique 충돌 방지)"""
+        if self.email == '':
+            self.email = None
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
         return f'{self.nickname} ({self.masked_phone})'
-    
+
     @property
     def masked_phone(self) -> str:
         """마스킹된 휴대폰 번호 (다른 사용자에게 보여줄 때)"""

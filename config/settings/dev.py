@@ -12,8 +12,9 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',  # noqa
     }
 }
+# 로컬 테스트도 진짜 메일 발송 (base.py의 SMTP 설정 사용)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # 로컬은 HTTPS 미사용
 SESSION_COOKIE_SECURE = False

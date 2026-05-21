@@ -63,6 +63,10 @@
             <button type="submit" class="btn">로그인</button>
         </form>
         
+       <p class="link" style="margin-top: 12px;">
+            <a href="{% url 'users:password_reset' %}" style="color: #888;">🔑 비밀번호를 잊으셨나요?</a>
+        </p>
+        
         <p class="link">
             아직 회원이 아니신가요? <a href="{% url 'users:signup' %}">회원가입</a>
         </p>
