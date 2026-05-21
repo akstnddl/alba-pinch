@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ notice.title }} - 공지사항{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    <a href="{% url 'notices:list' %}" class="back">←</a>
+    <h1>공지사항</h1>
+    <span style="width: 30px;"></span>
+</div>
+
+<div class="page">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}<div class="msg {{ message.tags }}">{{ message }}</div>{% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="card">
+        {% if notice.is_pinned %}
+        <span class="badge" style="background: #D85A30; color: white; font-size: 11px;">📌 고정</span>
+        {% endif %}
+        <h2 style="font-size: 18px; margin-top: 8px; margin-bottom: 8px; line-height: 1.4;">{{ notice.title }}</h2>
+        <div style="font-size: 11px; color: #999; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0;">
+            {{ notice.created_at|date:"Y년 n월 j일" }}
+            {% if notice.author %} · {{ notice.author.nickname }}{% endif %}
+        </div>
+        <div style="font-size: 14px; line-height: 1.7; white-space: pre-wrap; color: #333;">{{ notice.content }}</div>
+    </div>
+    
+    {# 운영자에게만 수정/삭제 버튼 #}
+    {% if user.is_authenticated and user.is_superuser %}
+    <div class="card" style="background: #FFF3E0;">
+        <p style="font-size: 13px; color: #888; text-align: center; margin-bottom: 10px;">운영자 전용</p>
+        <div style="display: flex; gap: 8px;">
+            <a href="{% url 'notices:update' notice.pk %}"
+               class="btn"
+               style="flex: 1; background: white; color: #555; border: 1px solid #ccc; text-align: center;">
+                ✏️ 수정
+            </a>
+            <a href="{% url 'notices:delete' notice.pk %}"
+               class="btn"
+               style="flex: 1; background: white; color: #D85A30; border: 1px solid #D85A30; text-align: center;">
+                🗑️ 삭제
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

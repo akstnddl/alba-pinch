@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_update %}공지사항 수정{% else %}공지사항 작성{% endif %} - 알바핀치{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    {% if is_update %}
+    <a href="{% url 'notices:detail' notice.pk %}" class="back">←</a>
+    <h1>공지사항 수정</h1>
+    {% else %}
+    <a href="{% url 'notices:manage' %}" class="back">←</a>
+    <h1>공지사항 작성</h1>
+    {% endif %}
+    <span style="width: 30px;"></span>
+</div>
+
+<div class="page">
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div class="form-group">
+            {% if field.field.widget.input_type == 'checkbox' %}
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    {{ field }}
+                    <span>{{ field.label }}</span>
+                </label>
+            {% else %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+            {% endif %}
+            {% if field.help_text %}
+                <small style="color: #888; font-size: 12px;">{{ field.help_text }}</small>
+            {% endif %}
+            {% if field.errors %}<div class="errors">{{ field.errors|striptags }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 8px;">
+            {% if is_update %}수정 완료{% else %}등록하기{% endif %}
+        </button>
+        
+        {% if is_update %}
+        <a href="{% url 'notices:detail' notice.pk %}"
+           class="btn btn-outline btn-block"
+           style="margin-top: 8px; text-align: center;">취소</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

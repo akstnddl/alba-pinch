@@ -20,29 +20,58 @@
     </div>
     {% endif %}
     
-    {# 검색 #}
-<form method="get" action="" style="margin-bottom: 8px;">
-    <input type="text" name="q" value="{{ keyword }}" placeholder="🔍 장소, 제목으로 검색"
-           class="form-control" style="padding: 10px 14px; font-size: 14px;">
-    {% if only_open %}<input type="hidden" name="only_open" value="1">{% endif %}
-</form>
-
-{# 필터 토글: 모집중만 보기 #}
-<div style="margin-bottom: 14px;">
-    {% if only_open %}
-    <a href="?{% if keyword %}q={{ keyword }}{% endif %}"
-       style="display: inline-block; padding: 6px 14px; background: #D85A30; color: white; 
-              border-radius: 16px; font-size: 13px; text-decoration: none; font-weight: 500;">
-        ✓ 모집중만 보기
-    </a>
-    {% else %}
-    <a href="?only_open=1{% if keyword %}&q={{ keyword }}{% endif %}"
-       style="display: inline-block; padding: 6px 14px; background: white; color: #555; 
-              border: 1px solid #ccc; border-radius: 16px; font-size: 13px; text-decoration: none;">
-        모집중만 보기
-    </a>
+    {# 공지사항 영역 (활성 공지가 있을 때만 표시) #}
+    {% if notices %}
+    <div style="background: #FFF8E1; border-left: 4px solid #FFA000; padding: 12px 16px; border-radius: 8px; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <span style="font-size: 13px; font-weight: 600; color: #B26A00;">📢 공지사항</span>
+            <a href="{% url 'notices:list' %}" style="font-size: 11px; color: #B26A00; text-decoration: none;">전체보기 →</a>
+        </div>
+        {% for notice in notices %}
+        <a href="{% url 'notices:detail' notice.pk %}"
+           style="display: block; padding: 8px 0; color: #555; font-size: 13px; 
+                  text-decoration: none; border-top: 1px solid rgba(255,160,0,0.2);
+                  line-height: 1.4;">
+            {% if notice.is_pinned %}📌 {% endif %}{{ notice.title }}
+        </a>
+        {% endfor %}
+    </div>
     {% endif %}
-</div>
+
+    {# 운영자에게만 표시되는 공지 관리 링크 #}
+    {% if user.is_authenticated and user.is_superuser %}
+    <div style="text-align: right; margin-bottom: 10px;">
+        <a href="{% url 'notices:manage' %}"
+           style="font-size: 12px; color: #888; text-decoration: none; 
+                  padding: 4px 10px; border: 1px solid #ccc; border-radius: 4px;">
+            ⚙️ 공지 관리
+        </a>
+    </div>
+    {% endif %}
+    
+    {# 검색 #}
+    <form method="get" action="" style="margin-bottom: 8px;">
+        <input type="text" name="q" value="{{ keyword }}" placeholder="🔍 장소, 제목으로 검색"
+               class="form-control" style="padding: 10px 14px; font-size: 14px;">
+        {% if only_open %}<input type="hidden" name="only_open" value="1">{% endif %}
+    </form>
+    
+    {# 필터 토글: 모집중만 보기 #}
+    <div style="margin-bottom: 14px;">
+        {% if only_open %}
+        <a href="?{% if keyword %}q={{ keyword }}{% endif %}"
+           style="display: inline-block; padding: 6px 14px; background: #D85A30; color: white; 
+                  border-radius: 16px; font-size: 13px; text-decoration: none; font-weight: 500;">
+            ✓ 모집중만 보기
+        </a>
+        {% else %}
+        <a href="?only_open=1{% if keyword %}&q={{ keyword }}{% endif %}"
+           style="display: inline-block; padding: 6px 14px; background: white; color: #555; 
+                  border: 1px solid #ccc; border-radius: 16px; font-size: 13px; text-decoration: none;">
+            모집중만 보기
+        </a>
+        {% endif %}
+    </div>
     
     {# 비로그인 시 회원가입 유도 #}
     {% if not user.is_authenticated %}

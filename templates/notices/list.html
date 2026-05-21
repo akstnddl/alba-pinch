@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}공지사항 - 알바핀치{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    <a href="{% url 'jobs:list' %}" class="back">←</a>
+    <h1>📢 공지사항</h1>
+    {% if user.is_authenticated and user.is_superuser %}
+    <a href="{% url 'notices:manage' %}" class="right">관리</a>
+    {% else %}
+    <span style="width: 30px;"></span>
+    {% endif %}
+</div>
+
+<div class="page">
+    {% if notices %}
+        {% for notice in notices %}
+        <a href="{% url 'notices:detail' notice.pk %}" class="card" style="display: block;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <div>
+                    {% if notice.is_pinned %}
+                    <span class="badge" style="background: #D85A30; color: white; font-size: 11px;">📌 고정</span>
+                    {% endif %}
+                </div>
+                <span style="font-size: 11px; color: #999;">{{ notice.created_at|date:"n/j" }}</span>
+            </div>
+            <h3 style="font-size: 15px; color: #222; line-height: 1.4;">{{ notice.title }}</h3>
+        </a>
+        {% endfor %}
+    {% else %}
+    <div class="card empty-state">
+        <p>등록된 공지사항이 없습니다</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

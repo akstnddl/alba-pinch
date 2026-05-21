@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'apps.jobs',
     'apps.reviews',
     'apps.core',
+    'apps.notices',
 ]
 
 MIDDLEWARE = [

@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import ApplicationForm, JobPostForm
 from .models import Application, JobPost
+from apps.notices.models import Notice
 from .services import (
     ApplicationError,
     accept_application,
@@ -72,10 +73,14 @@ def job_list(request: HttpRequest) -> HttpResponse:
             Q(location__icontains=keyword)
         )
 
+# 메인에 표시할 공지사항 (활성 상태, 최신 3개)
+    notices = Notice.objects.filter(is_active=True)[:3]
+
     return render(request, 'jobs/list.html', {
         'job_posts': qs[:50],  # 최신 50개
         'keyword': keyword,
         'only_open': only_open,
+        'notices': notices,
     })
 
 
